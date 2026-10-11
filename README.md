@@ -1,4 +1,4 @@
-# TypeSafe .NET SDK
+# 📦 TypeSafe .NET SDK
 
 Ask typed questions about text or JSON state and use structured answers in .NET code.
 
@@ -17,18 +17,19 @@ managed by TypeSafe AI.
 > Installing that package does not install this repository's implementation.
 > Until the publication name is resolved, use a project reference to this checkout.
 
-## How it works
+## 🔄 How It Works
 
-1. Supply text or structured state, such as a support ticket or an application event.
-2. Define named `Noul`, `Choice`, or `Score` questions about that state.
-3. Call `SystemOneAsync` to send the questions in one HTTP request.
-4. Read typed answers and apply your application's decision thresholds.
+1. **Provide state** as text or a structured object, such as a support ticket or an application event.
+2. **Define questions** with named `Noul`, `Choice`, or `Score` primitives.
+3. **Send** the questions in one HTTP request with `SystemOneAsync`.
+4. **Use answers** through typed response properties and your application's decision thresholds.
 
-The SDK sends state and questions to the configured API endpoint. It does not
-run models locally. Review what you send and avoid including credentials or
-unnecessary personal data in request state.
+> [!IMPORTANT]
+> The SDK sends state and questions to the configured API endpoint. It does not
+> run models locally. Review what you send and avoid including credentials or
+> unnecessary personal data in request state.
 
-## Quick start
+## 🚀 Quick Start
 
 Create an API key in the [TypeSafe console](https://console.typesafe.ai/) and set
 `TYPESAFE_API_KEY` in your shell.
@@ -45,7 +46,7 @@ Bash:
 export TYPESAFE_API_KEY="YOUR_API_KEY"
 ```
 
-Reference the SDK project as described under [Installation](#installation), then
+Reference the SDK project as described under [Installation](#-installation), then
 ask questions about a support ticket:
 
 ```csharp
@@ -80,10 +81,19 @@ Console.WriteLine(response.Choices["tone"].Choice);
 Console.WriteLine(response.Scores["urgency"].Score);
 ```
 
-The client reads `TYPESAFE_API_KEY` when `ApiKey` is not supplied. Requests use
-`jev-latest` and `https://api.typesafe.ai/` by default.
+> [!NOTE]
+> The client reads `TYPESAFE_API_KEY` when `ApiKey` is not supplied. Requests use
+> `jev-latest` and `https://api.typesafe.ai/` by default.
 
-## Question types
+## ✨ Features
+
+- ✅ Typed `Noul`, `Choice`, and `Score` questions with named answers.
+- ✅ Text or structured state and multiple questions in one request.
+- ✅ Model discovery, a configurable default model, and per-request model selection.
+- ✅ Asynchronous HTTP calls, cancellation, and retries for HTTP `408`, `429`, and `5xx` responses.
+- ✅ .NET Standard 2.0 and .NET 10 support with caller-supplied `HttpClient` integration.
+
+## 📤 Question Types and Answers
 
 | Question | Purpose | Answer properties |
 | --- | --- | --- |
@@ -100,9 +110,9 @@ Answers retain the question names supplied in the request. Access them through
 `response.Answers` dictionary. The response also includes `Model` and optional
 `Usage` information.
 
-## Common usage
+## 🧰 Common Usage
 
-### Send structured state
+### Send Structured State
 
 Pass a serializable object instead of a plain string:
 
@@ -120,7 +130,7 @@ var response = await client.SystemOneAsync(
 
 Examples in this section assume an existing `TypeSafeClient` named `client`.
 
-### Discover models
+### Discover Models
 
 ```csharp
 var models = await client.ListModelsAsync();
@@ -135,7 +145,7 @@ Set `TypeSafeClientOptions.DefaultModel` for all requests, or pass `model` to
 `SystemOneAsync` to override it for one call. The service determines which model
 names are available to your account.
 
-### Cancel a request
+### Cancel a Request
 
 ```csharp
 using var cancellation = new CancellationTokenSource(TimeSpan.FromSeconds(30));
@@ -145,7 +155,7 @@ var models = await client.ListModelsAsync(cancellation.Token);
 Both API methods accept a `CancellationToken`. Cancellation also interrupts
 the delay between retry attempts.
 
-## Configuration
+## ⚙️ Configuration
 
 ```csharp
 using var client = new TypeSafeClient(options: new TypeSafeClientOptions
@@ -171,7 +181,7 @@ configured through options or the request argument, not an environment variable.
 For a custom API root, include a trailing slash and use an endpoint that supports
 the TypeSafe request and response format.
 
-### Supply an HTTP client
+### Supply an HTTP Client
 
 ```csharp
 using var httpClient = new HttpClient
@@ -187,7 +197,7 @@ by the caller. Its existing `BaseAddress` takes precedence over `BaseUrl`.
 The SDK sets its bearer authorization header, so avoid sharing that HTTP client
 with unrelated services.
 
-## Error handling
+## 🛠️ Error Handling
 
 After retries are exhausted, unsuccessful HTTP responses raise
 `TypeSafeApiException`, which exposes `StatusCode` and `ResponseBody`:
@@ -213,7 +223,7 @@ Missing API credentials raise `InvalidOperationException`. Negative
 `MaxRetries`, null state, and null or empty questions are rejected before a
 request is sent. Treat response bodies as potentially sensitive when logging.
 
-## Installation
+## 📥 Installation
 
 Until this repository has its own published NuGet identity, clone it and add a
 project reference from your application directory:
@@ -236,7 +246,7 @@ dotnet pack src/Typesafe.Sdk.csproj --configuration Release --output artifacts
 Run that command from the repository root. It produces a NuGet package and a
 symbol package. Local packing does not upload either artifact.
 
-## Architecture
+## 🏗️ Architecture
 
 The production library has two main source files:
 
@@ -248,7 +258,7 @@ when credentials are available. See the
 [architecture guide](https://github.com/mehdihadeli/typesafe-jev-dotnet-sdk/blob/main/docs/guide/architecture.md)
 for the request path and project dependencies.
 
-## Development
+## 💻 Development
 
 From the repository root:
 
@@ -265,7 +275,7 @@ tests are skipped.
 For release preparation and versioning, see the
 [release versioning guide](https://github.com/mehdihadeli/typesafe-jev-dotnet-sdk/blob/main/docs/guide/versioning.md).
 
-## Documentation
+## 📚 Documentation
 
 Repository guides:
 
@@ -284,7 +294,7 @@ npm run docs:dev
 
 Then open `http://localhost:5173`.
 
-## Contributing
+## 🤝 Contributing
 
 Open an [issue](https://github.com/mehdihadeli/typesafe-jev-dotnet-sdk/issues)
 for bugs or proposed changes. For pull requests, build the solution, run unit
