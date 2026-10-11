@@ -31,17 +31,17 @@ jobs:
           dotnet-version: 10.0.x
 
       - name: Restore
-        run: dotnet restore Typesafe.Jev.slnx
+        run: dotnet restore Typesafe.Sdk.slnx
 
       - name: Build
-        run: dotnet build Typesafe.Jev.slnx --configuration Release --no-restore
+        run: dotnet build Typesafe.Sdk.slnx --configuration Release --no-restore
 
       - name: Test unit project
-        run: dotnet test --project tests/unit-tests/Typesafe.Jev.UnitTests.csproj --configuration Release --no-restore
+        run: dotnet test --project tests/unit-tests/Typesafe.Sdk.UnitTests.csproj --configuration Release --no-restore
 
       - name: Test integration project
         if: ${{ env.TYPESAFE_API_KEY != '' }}
-        run: dotnet test --project tests/integration-tests/Typesafe.Jev.IntegrationTests.csproj --configuration Release --no-restore
+        run: dotnet test --project tests/integration-tests/Typesafe.Sdk.IntegrationTests.csproj --configuration Release --no-restore
 
   calculate-version:
     name: Calculate release version
@@ -96,10 +96,10 @@ jobs:
           dotnet-version: 10.0.x
 
       - name: Restore
-        run: dotnet restore src/Typesafe.Jev.csproj
+        run: dotnet restore src/Typesafe.Sdk.csproj
 
       - name: Pack
-        run: dotnet pack src/Typesafe.Jev.csproj --configuration Release --no-restore --output artifacts -p:PublicRelease=true -p:PackageVersion=${{ needs['calculate-version'].outputs.version }}
+        run: dotnet pack src/Typesafe.Sdk.csproj --configuration Release --no-restore --output artifacts -p:PublicRelease=true -p:PackageVersion=${{ needs['calculate-version'].outputs.version }}
 
       - name: Publish to NuGet.org
         run: dotnet nuget push "artifacts/*.nupkg" --api-key "${{ secrets.NUGET_API_KEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate

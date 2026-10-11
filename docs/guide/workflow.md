@@ -7,7 +7,7 @@ Use two test layers, each with a different job.
 Unit tests run without credentials or network access. They verify HTTP methods, paths, bearer authentication, serialized request fields, and polymorphic response models.
 
 ```bash
-dotnet test --project tests/unit-tests/Typesafe.Jev.UnitTests.csproj
+dotnet test --project tests/unit-tests/Typesafe.Sdk.UnitTests.csproj
 ```
 
 When adding a client method, assert both sides of the boundary:
@@ -21,7 +21,7 @@ Integration tests verify that the SDK can authenticate against the real TypeSafe
 
 ```bash
 export TYPESAFE_API_KEY="your-api-key"
-dotnet test --project tests/integration-tests/Typesafe.Jev.IntegrationTests.csproj
+dotnet test --project tests/integration-tests/Typesafe.Sdk.IntegrationTests.csproj
 ```
 
 Without the key, xUnit v3 skips the live tests through `SkipUnless`. Do not put a key in a test file, committed `.env`, or CI log.

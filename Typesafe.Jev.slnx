@@ -1,5 +1,0 @@
-<Solution>
-  <Project Path="src/Typesafe.Jev.csproj" />
-  <Project Path="tests/unit-tests/Typesafe.Jev.UnitTests.csproj" />
-  <Project Path="tests/integration-tests/Typesafe.Jev.IntegrationTests.csproj" />
-</Solution>
