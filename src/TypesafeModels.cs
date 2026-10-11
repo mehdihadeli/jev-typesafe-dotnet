@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Typesafe.Jev;
+namespace Typesafe.Sdk;
 
 public abstract class TypeSafeQuestion
 {

@@ -1,10 +1,10 @@
 ---
 layout: home
-title: TypeSafe Jev .NET SDK
+title: TypeSafe .NET SDK
 titleTemplate: Typed decisions for .NET
 description: Ask structured questions about text or JSON state and use Jev answers directly in .NET code.
 hero:
-  name: TypeSafe Jev .NET SDK
+  name: TypeSafe .NET SDK
   text: Typed decisions for .NET
   tagline: Send state and typed questions to Jev, then branch on choices, scores, probabilities, and confidence without parsing generated text.
   actions:

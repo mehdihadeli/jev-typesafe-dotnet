@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework />
+    <TargetFrameworks>netstandard2.0;net10.0</TargetFrameworks>
+    <PackageId>Typesafe.Sdk</PackageId>
+    <AssemblyName>Typesafe.Sdk</AssemblyName>
+    <RootNamespace>Typesafe.Sdk</RootNamespace>
+    <Description>Community-maintained .NET SDK for the TypeSafe AI System One API. Ask typed Noul, Choice, and Score questions and discover available models.</Description>
+    <PackageTags>typesafe;ai;system-one;jev;sdk;classification</PackageTags>
+    <PackageProjectUrl>https://github.com/mehdihadeli/typesafe-dotnet-sdk</PackageProjectUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <DebugType>portable</DebugType>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/mehdihadeli/typesafe-dotnet-sdk</RepositoryUrl>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <PackageReference Include="System.Net.Http.Json" />
+    <PackageReference Include="System.Text.Json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md" Pack="true" PackagePath="README.md" />
+  </ItemGroup>
+
+  <Target Name="ApplyReleasePackageVersion" AfterTargets="GetBuildVersion" Condition="'$(ReleasePackageVersion)' != ''">
+    <PropertyGroup>
+      <PackageVersion>$(ReleasePackageVersion)</PackageVersion>
+    </PropertyGroup>
+  </Target>
+</Project>

@@ -1,9 +1,9 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
-using Typesafe.Jev;
+using Typesafe.Sdk;
 
-namespace Typesafe.Jev.UnitTests;
+namespace Typesafe.Sdk.UnitTests;
 
 public sealed class TypeSafeClientTests
 {

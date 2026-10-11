@@ -4,6 +4,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Typesafe.Jev.csproj" />
+    <ProjectReference Include="..\..\src\Typesafe.Sdk.csproj" />
   </ItemGroup>
 </Project>

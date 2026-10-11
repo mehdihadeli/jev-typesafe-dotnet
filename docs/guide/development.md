@@ -10,26 +10,26 @@ typesafe-jev-dotnet-sdk/
 │   ├── Directory.Build.props
 │   ├── TypeSafeClient.cs
 │   ├── TypesafeModels.cs
-│   └── Typesafe.Jev.csproj
+│   └── Typesafe.Sdk.csproj
 ├── tests/
 │   ├── Directory.Build.props
 │   ├── unit-tests/
 │   │   ├── TypeSafeClientTests.cs
-│   │   └── Typesafe.Jev.UnitTests.csproj
+│   │   └── Typesafe.Sdk.UnitTests.csproj
 │   └── integration-tests/
 │       ├── TypeSafeIntegrationTestBase.cs
 │       ├── TypeSafeCoreIntegrationTests.cs
-│       └── Typesafe.Jev.IntegrationTests.csproj
+│       └── Typesafe.Sdk.IntegrationTests.csproj
 ├── Directory.Build.props
 ├── Directory.Packages.props
-└── Typesafe.Jev.slnx
+└── Typesafe.Sdk.slnx
 ```
 
 ## Dependency direction
 
 ```mermaid
 flowchart TD
-  U[Unit tests] --> L[Typesafe.Jev library]
+  U[Unit tests] --> L[Typesafe.Sdk library]
   I[Integration tests] --> L
   L --> H[HttpClient]
   L --> J[System.Text.Json]
@@ -44,19 +44,19 @@ Restore and build the solution:
 
 ```bash
 dotnet restore
-dotnet build Typesafe.Jev.slnx
+dotnet build Typesafe.Sdk.slnx
 ```
 
 Run unit tests:
 
 ```bash
-dotnet test --project tests/unit-tests/Typesafe.Jev.UnitTests.csproj
+dotnet test --project tests/unit-tests/Typesafe.Sdk.UnitTests.csproj
 ```
 
 Run integration tests:
 
 ```bash
-dotnet test --project tests/integration-tests/Typesafe.Jev.IntegrationTests.csproj
+dotnet test --project tests/integration-tests/Typesafe.Sdk.IntegrationTests.csproj
 ```
 
 Integration tests use xUnit v3 `SkipUnless` and require `TYPESAFE_API_KEY`. They should never be used as the only validation for serialization or error behavior.

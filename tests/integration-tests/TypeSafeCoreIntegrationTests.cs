@@ -1,4 +1,4 @@
-namespace Typesafe.Jev.IntegrationTests;
+namespace Typesafe.Sdk.IntegrationTests;
 
 public sealed class TypeSafeCoreIntegrationTests : TypeSafeIntegrationTestBase
 {

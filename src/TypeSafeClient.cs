@@ -4,7 +4,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Typesafe.Jev;
+namespace Typesafe.Sdk;
 
 public sealed class TypeSafeClientOptions
 {

@@ -1,6 +1,6 @@
-using Typesafe.Jev;
+using Typesafe.Sdk;
 
-namespace Typesafe.Jev.IntegrationTests;
+namespace Typesafe.Sdk.IntegrationTests;
 
 public abstract class TypeSafeIntegrationTestBase
 {

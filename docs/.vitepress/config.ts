@@ -1,8 +1,8 @@
 import { defineConfig } from "vitepress";
 
 export default defineConfig({
-  title: "TypeSafe Jev .NET SDK",
-  description: "Typed .NET access to TypeSafe Jev decisions",
+  title: "TypeSafe .NET SDK",
+  description: "Community-maintained typed .NET client for the TypeSafe AI System One API",
   base: process.env.GITHUB_ACTIONS
     ? `/${process.env.GITHUB_REPOSITORY?.split("/")[1] ?? "typesafe-jev-dotnet-sdk"}/`
     : "/",
@@ -49,7 +49,7 @@ export default defineConfig({
     search: { provider: "local" },
     footer: {
       message: "Ask typed questions. Receive decisions your code can use.",
-      copyright: "TypeSafe Jev .NET SDK",
+      copyright: "TypeSafe .NET SDK",
     },
   },
 });

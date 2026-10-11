@@ -1,208 +1,202 @@
-# Versioning with NBGV
+# Release versioning
 
-The SDK uses [Nerdbank.GitVersioning (NBGV)](https://dotnet.github.io/Nerdbank.GitVersioning/) to calculate package and assembly versions from committed version intent and Git history.
+Typesafe.Sdk uses [Nerdbank.GitVersioning (NBGV)](https://dotnet.github.io/Nerdbank.GitVersioning/)
+with GitHub Flow. `main` is the long-lived branch. Changes arrive through pull
+requests, and release tags identify approved commits on `main`.
 
-This is a single-branch GitHub Flow policy:
+The release contract is:
 
-- `main` is the only long-lived development branch.
-- Preview, RC, and stable changes to release intent are reviewed pull requests.
-- Tags identify the exact RC or stable commit that was approved.
-- CI uses a full Git clone so NBGV can calculate version height.
+- Ordinary merges advance a commit-height preview version.
+- RC and stable releases start with a reviewed change to `version.json`.
+- CI validates release tags against the version calculated by NBGV.
+- Preview and RC packages include a UTC date and GitHub Actions run number.
+- Stable packages use the clean `MAJOR.MINOR.PATCH` version.
 
-## Version lifecycle
+## Sources of truth
 
-```text
-0.1.0-preview.N -> 0.1.0-rc.N -> 0.1.0
-```
+[`version.json`](../../version.json) contains version intent. NBGV calculates
+SemVer, assembly metadata, and commit height from that file and Git history.
+CI pins the NBGV CLI to `3.10.94`; use that version locally too.
 
-The suffix is committed in `version.json`. A tag does not promote a preview or RC into another release state.
-
-| State                | GitHub Flow action                 | Example            |
-| -------------------- | ---------------------------------- | ------------------ |
-| Start development    | Merge a PR changing `version.json` | `0.1.0-preview.1`  |
-| Continue development | Merge ordinary PRs                 | Same rolling draft |
-| Publish next preview | Merge another version PR           | `0.1.0-preview.2`  |
-| Start stabilization  | Merge an RC version PR             | `0.1.0-rc.1`       |
-| Publish RC           | Tag the approved commit            | `v0.1.0-rc.1`      |
-| Declare stable       | Merge a stable version PR          | `0.1.0`            |
-| Publish stable       | Tag the approved commit            | `v0.1.0`           |
-
-## Configure `version.json`
-
-The repository uses an explicit three-part prerelease version:
+Current preview configuration:
 
 ```json
 {
-  "$schema": "https://raw.githubusercontent.com/dotnet/Nerdbank.GitVersioning/main/src/NerdBank.GitVersioning/version.schema.json",
-  "version": "0.1.0-preview.1",
+  "version": "1.0.0-preview.{height}",
   "publicReleaseRefSpec": [
     "^refs/heads/main$",
-    "^refs/tags/v\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z.-]+)?$"
-  ],
-  "release": {
-    "tagName": "v{version}"
-  },
-  "cloudBuild": {
-    "buildNumber": {
-      "enabled": true
-    }
-  }
+    "^refs/tags/v\\d+\\.\\d+\\.\\d+(?:-rc\\.\\d+)?$"
+  ]
 }
 ```
 
-`publicReleaseRefSpec` makes builds from `main` and version tags public release builds. `SemVer2` is the canonical release value used by CI and Release Drafter.
-
-## Prepare a release locally
-
-Install NBGV once:
+Install the CLI once and inspect the calculated version:
 
 ```bash
-dotnet tool install --global nbgv
+dotnet tool install --global nbgv --version 3.10.94
+dotnet nbgv get-version -v SemVer2
 ```
 
-Prepare the next preview through a pull request:
+An untagged commit can include `.g<commit>` in the calculated version. That
+suffix identifies the source commit and is not part of the public release tag.
+CI uses `SemVer2` rather than the normalized `NuGetPackageVersion` output.
+
+Run the helper commands from the repository root in Bash, such as Git Bash or
+WSL on Windows. Preparation helpers change version intent only; they do not
+commit, push, or publish. The `tag` command creates a local Git tag but does
+not push it.
+
+## Version shapes
+
+| Source ref | Effective version | Release intent | Publication |
+| --- | --- | --- | --- |
+| `main`, preview height `0` | `1.0.0-preview.0` | none | Validation only |
+| `main`, preview height `1+` | `1.0.0-preview.N.YYDDD.RUN_NUMBER` | dev | NuGet prerelease and GitHub draft |
+| `v1.0.0-rc.1` | `1.0.0-rc.1.YYDDD.RUN_NUMBER` | staging | NuGet prerelease and GitHub prerelease |
+| `v1.0.0` | `1.0.0` | production | NuGet package and GitHub release |
+
+`YYDDD` is the UTC two-digit year and day of year. `RUN_NUMBER` is the GitHub
+Actions workflow run number. These suffixes distinguish separately built
+preview or RC packages without replacing the NBGV preview or RC ordinal.
+
+The calculator also outputs assembly version, informational version
+(`VERSION+COMMIT`), and the short source commit. The pack step passes the
+effective package version through `ReleasePackageVersion`. The project applies
+this override after NBGV calculates versions, so the package matches CI's
+dated preview or RC version. NBGV continues to generate assembly metadata;
+the calculator's informational-version output does not override it.
+
+Typesafe.Sdk publishes the SDK package to NuGet.org and uploads package and
+symbol-package assets to the matching GitHub release. It does not publish
+executables, Docker images, or deployments. The calculator's environment
+output describes release intent; the publish job always uses the GitHub
+`nuget` environment for permissions and secrets.
+
+## Preview releases
+
+Do not edit `preview.1` to create `preview.2`. NBGV derives the ordinal from
+Git commit height. Ordinary feature, fix, test, and documentation pull requests
+should not change `version.json`.
+
+The initial preview-train commit is validation-only when it calculates
+`preview.0`. Later accepted changes advance the preview height and publish
+dated preview packages. Preview tags are not supported; preview packages
+publish from `main`.
+
+Start a new preview train on a short-lived branch:
 
 ```bash
-./release-version.sh prepare-preview 0.1.0
+bash scripts/release-version.sh prepare-train 1.1.0
 git add version.json
-git commit -m "Start 0.1 preview"
+git commit -m "chore: start 1.1.0 preview train"
+git push -u origin chore/prepare-1.1.0-preview
 ```
 
-The helper reads the current matching preview number and increments it. Ordinary feature, fix, test, and documentation PRs do not change `version.json`.
+Open a pull request. The helper sets `1.1.0-preview.{height}` and removes
+bootstrap height-offset properties if present.
 
-Check the calculated version locally:
+## RC and stable releases
 
-```bash
-nbgv get-version -v SemVer2
-```
+Prepare version changes on short-lived branches and merge them through
+protected `main`. Tag the merged commit after CI validation succeeds.
 
-Use `SemVer2` for Release Drafter metadata. Do not use `NuGetPackageVersion`, which can normalize prerelease numbers.
-
-## Publish a release candidate
-
-Prepare the RC through a reviewed version PR:
+Prepare the first RC train:
 
 ```bash
-./release-version.sh prepare-rc 0.1.0
+bash scripts/release-version.sh prepare-rc 1.0.0
 git add version.json
-git commit -m "Begin 0.1 release candidate"
+git commit -m "chore: prepare 1.0.0 RC train"
+git push -u origin chore/prepare-1.0.0-rc
 ```
 
-After the exact merged `main` commit is validated, create and push its tag:
+After the pull request is merged and local `main` is updated, inspect the
+calculated version, then create and push its tag:
 
 ```bash
-./release-version.sh tag
-git push origin v0.1.0-rc.1
+dotnet nbgv get-version -v SemVer2
+bash scripts/release-version.sh tag
+git push origin v1.0.0-rc.1
 ```
 
-If another RC is required, merge fixes and run `prepare-rc 0.1.0` again. NBGV creates the tag from the calculated version and does not modify `version.json`.
+The tag above is an example; push the tag NBGV actually creates. Later RC fixes
+do not edit `version.json` or rerun `prepare-rc`. Another merge advances the
+`1.0.0-rc.{height}` template to the next RC ordinal.
 
-## Publish a stable release
-
-Remove the prerelease designation through a version PR:
+Prepare stable through a reviewed pull request:
 
 ```bash
-./release-version.sh prepare-stable 0.1.0
+bash scripts/release-version.sh prepare-stable 1.0.0
 git add version.json
-git commit -m "Declare 0.1 stable"
+git commit -m "chore: prepare 1.0.0"
+git push -u origin chore/prepare-1.0.0
 ```
 
-Validate the exact merged commit, then tag it:
+After that change is merged and validated, update local `main` and run:
 
 ```bash
-nbgv get-version -v SemVer2
-./release-version.sh tag
-git push origin v0.1.0
+bash scripts/release-version.sh tag
+git push origin v1.0.0
 ```
 
-The tag workflow publishes the NuGet package and matching Release Drafter release. After stable publication, start the next development line:
+`prepare-stable` removes height-offset properties. The stable tag must point
+to the merged stable-preparation commit, and CI publishes clean `1.0.0`
+package metadata. After stable publication, use `prepare-train` to start the
+next preview line.
+
+## CI behavior
+
+[`.github/workflows/build-and-publish.yml`](../../.github/workflows/build-and-publish.yml)
+runs validation for pull requests targeting `main`, `main` pushes, and `v*`
+tags. Version calculation and publication run only for `main` and `v*` tags.
+Every version-calculating job checks out full history and tags with
+`actions/checkout@v4` and `fetch-depth: 0`.
+
+The workflow uses these stages:
+
+1. `build-test` restores, builds, and runs unit tests. Integration tests run
+   only when `TYPESAFE_API_KEY` is available.
+2. `calculate-version` invokes [`scripts/calculate-version.sh`](../../scripts/calculate-version.sh)
+   with the pinned NBGV CLI, selecting the effective version and release intent.
+3. `publish` packs and pushes the SDK, updates or publishes the matching
+   Release Drafter release, and uploads package assets. On `main`, only the
+   `dev` intent publishes: `preview.0`, untagged RC commits, and untagged stable
+   commits do not publish. NuGet publication requires `NUGET_API_KEY`.
+
+For a supported release tag (`vMAJOR.MINOR.PATCH` or
+`vMAJOR.MINOR.PATCH-rc.N`), CI removes the `v` prefix and compares it with NBGV's
+calculated version after removing `.g<commit>`. A mismatch fails before
+publication. For example, `v1.0.0-rc.3` cannot publish a commit calculating as
+`1.0.0-rc.2`. Other tag shapes fail version calculation.
+
+RC tag validation happens before CI appends the date and run number. The
+GitHub release keeps the original RC tag, while its displayed version and
+NuGet package include the build suffix.
+
+Release Drafter uses `if: always()` so release notes can still update when an
+earlier publication step fails. The job remains failed; fix the publication
+problem and rerun it.
+
+## Release Drafter
+
+[`.github/release-drafter.yml`](../../.github/release-drafter.yml) classifies
+pull requests by labels and excludes `skip-changelog`. `include-pre-releases:
+false` keeps stable release notes based on the previous stable release.
+
+On `main`, Release Drafter updates a preview draft. On RC and stable tags, the
+workflow publishes the matching release. Release Drafter does not create the
+Git tag; `dotnet nbgv tag` creates it locally, and the operator pushes it
+explicitly. There is no separate Release Drafter workflow.
+
+## Quick checks
+
+Before pushing a release tag, inspect the calculated version:
 
 ```bash
-./release-version.sh prepare-preview 0.2.0
+dotnet nbgv get-version -v SemVer2
+dotnet test --project tests/unit-tests/Typesafe.Sdk.UnitTests.csproj --configuration Release
 ```
 
-## GitHub Actions
+Then inspect `version.json`, confirm the tag comes from the merged `main`
+commit, and push only that tag. Never rewrite version intent in CI. The
+release helper never commits or pushes on your behalf.
 
-The repository uses one release workflow for validation and publication:
-
-| Workflow                | Trigger                          | Responsibility                                                                           |
-| ----------------------- | -------------------------------- | ---------------------------------------------------------------------------------------- |
-| `build-and-publish.yml` | Pull requests, `main`, `v*` tags | Restore, build, test, pack, publish packages, upload assets, and update Release Drafter. |
-| `deploy-docs.yml`       | Documentation changes on `main`  | Build VitePress and deploy GitHub Pages.                                                 |
-| `labeler.yml`           | Pull request changes             | Apply source, test, build, and documentation labels.                                     |
-
-There is no separate Release Drafter workflow. This prevents duplicate drafts and competing publication runs. Every version-calculating workflow uses `actions/checkout` with `fetch-depth: 0`.
-
-The build workflow behavior is:
-
-- Pull requests: build and test only.
-- Ordinary `main` pushes: build and validate; no release publication unless the committed version is a preview.
-- Preview `main` pushes: publish the preview package and create or update a GitHub prerelease draft.
-- RC and stable `v*` tags: publish the approved package and matching GitHub release.
-
-The workflow requires `NUGET_API_KEY` for NuGet publication. Live integration tests run when `TYPESAFE_API_KEY` is configured and are skipped otherwise.
-
-Release Drafter uses `include-pre-releases: false`, keeping the previous stable release as the comparison baseline for stable notes. Do not create a second GitHub Release manually.
-
-## End-to-end flow
-
-### Preview
-
-```bash
-./release-version.sh prepare-preview 0.1.0
-git add version.json
-git commit -m "Start 0.1.0-preview.1"
-git push origin <branch>
-```
-
-Merge the PR. CI calculates `0.1.0-preview.1`, publishes the preview package, and creates or updates the draft named `v0.1.0-preview.1` with package assets. The draft remains unpublished. Later ordinary PRs update the same rolling release notes. To publish another preview, prepare and merge another version PR:
-
-```bash
-./release-version.sh prepare-preview 0.1.0
-```
-
-This changes the committed version to `0.1.0-preview.2`.
-
-### RC and stable promotion
-
-```bash
-./release-version.sh prepare-rc 0.1.0
-# merge and validate version PR
-./release-version.sh tag
-git push origin v0.1.0-rc.1
-```
-
-After RC approval:
-
-```bash
-./release-version.sh prepare-stable 0.1.0
-# merge and validate version PR
-./release-version.sh tag
-git push origin v0.1.0
-```
-
-Every tag must be created from the exact approved `main` commit. NBGV creates tags; Release Drafter publishes the matching release.
-
-## Release checklist
-
-### Preview
-
-1. Run `./release-version.sh prepare-preview <major.minor.patch>`.
-2. Open and merge the version PR.
-3. Merge ordinary feature, fix, test, and documentation PRs.
-4. Confirm CI publishes the preview package and updates the prerelease draft.
-
-### RC or stable
-
-1. Run `prepare-rc` or `prepare-stable`.
-2. Open and merge the version PR.
-3. Validate the exact `main` commit.
-4. Run `./release-version.sh tag`.
-5. Push the generated `v*` tag.
-6. Confirm CI publishes the package and matching release.
-
-## References
-
-- [NBGV versioning workflow](https://dotnet.github.io/Nerdbank.GitVersioning/docs/versioning-workflow.html)
-- [NBGV cloud build requirements](https://dotnet.github.io/Nerdbank.GitVersioning/docs/cloudbuild.html#requirements)
-- [NBGV CLI](https://dotnet.github.io/Nerdbank.GitVersioning/docs/nbgv-cli.html)
