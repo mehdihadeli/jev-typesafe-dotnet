@@ -1,6 +1,6 @@
 # 📦 TypeSafe .NET SDK
 
-Ask typed questions about text or JSON state and use structured answers in .NET code.
+Ask typed questions about text or JSON state and use structured answers directly in .NET code.
 
 This community-maintained SDK calls the [TypeSafe AI System One API](https://docs.typesafe.ai/).
 It sends application state and named questions, deserializes the answers into C#
@@ -47,7 +47,7 @@ export TYPESAFE_API_KEY="YOUR_API_KEY"
 ```
 
 Reference the SDK project as described under [Installation](#-installation), then
-ask questions about a support ticket:
+ask several typed questions about a support ticket:
 
 ```csharp
 using Typesafe.Sdk;
@@ -92,6 +92,21 @@ Console.WriteLine(response.Scores["urgency"].Score);
 - ✅ Model discovery, a configurable default model, and per-request model selection.
 - ✅ Asynchronous HTTP calls, cancellation, and retries for HTTP `408`, `429`, and `5xx` responses.
 - ✅ .NET Standard 2.0 and .NET 10 support with caller-supplied `HttpClient` integration.
+
+## 📤 What the SDK Produces
+
+Every `SystemOneAsync` call returns a `SystemOneResponse` containing the model,
+typed answers, and optional usage information:
+
+| Response view | Contains |
+| --- | --- |
+| `Answers` | Every answer keyed by the question name |
+| `Nouls` | `NoulAnswer` values for yes/no questions |
+| `Choices` | `ChoiceAnswer` values and option probabilities |
+| `Scores` | `ScoreAnswer` values, confidence, legend, and probabilities |
+
+Answer names are the same names supplied in the request, so application code can
+route on stable keys instead of parsing generated text.
 
 ## 📤 Question Types and Answers
 
@@ -155,6 +170,19 @@ var models = await client.ListModelsAsync(cancellation.Token);
 Both API methods accept a `CancellationToken`. Cancellation also interrupts
 the delay between retry attempts.
 
+### Use a Caller-Owned HTTP Client
+
+```csharp
+using var httpClient = new HttpClient
+{
+    Timeout = TimeSpan.FromSeconds(60)
+};
+using var client = new TypeSafeClient(httpClient: httpClient);
+```
+
+Reuse `HttpClient` instances across requests. A caller-supplied client remains
+owned by the caller; the SDK only disposes clients it creates itself.
+
 ## ⚙️ Configuration
 
 ```csharp
@@ -181,21 +209,9 @@ configured through options or the request argument, not an environment variable.
 For a custom API root, include a trailing slash and use an endpoint that supports
 the TypeSafe request and response format.
 
-### Supply an HTTP Client
-
-```csharp
-using var httpClient = new HttpClient
-{
-    Timeout = TimeSpan.FromSeconds(60)
-};
-using var client = new TypeSafeClient(httpClient: httpClient);
-```
-
-Reuse clients across requests. When the SDK creates its own `HttpClient`, it
-disposes it with `TypeSafeClient`. A caller-supplied `HttpClient` remains owned
-by the caller. Its existing `BaseAddress` takes precedence over `BaseUrl`.
-The SDK sets its bearer authorization header, so avoid sharing that HTTP client
-with unrelated services.
+When the SDK creates its own `HttpClient`, it disposes it with `TypeSafeClient`.
+An existing `BaseAddress` takes precedence over `BaseUrl`. The SDK sets the
+bearer authorization header, so avoid sharing that client with unrelated services.
 
 ## 🛠️ Error Handling
 
@@ -237,6 +253,10 @@ Adjust the reference path if you clone the repository elsewhere. Building from
 source requires the .NET 10 SDK selected by the repository's SDK configuration.
 The library produces .NET Standard 2.0 and .NET 10 assemblies.
 
+The package name `Typesafe.Sdk` is currently used on NuGet.org by another
+community project. Do not install that package expecting this implementation;
+use the project reference above until the publication name is resolved.
+
 To inspect a local release package without publishing it:
 
 ```bash
@@ -258,6 +278,26 @@ when credentials are available. See the
 [architecture guide](https://github.com/mehdihadeli/typesafe-jev-dotnet-sdk/blob/main/docs/guide/architecture.md)
 for the request path and project dependencies.
 
+## 📖 Documentation
+
+The [documentation site](docs) expands on the examples and implementation:
+
+- [Quickstart](docs/guide/quickstart.md): install the SDK and send a first request.
+- [Workflow](docs/guide/workflow.md): test deterministic HTTP behavior and live API calls.
+- [Architecture](docs/guide/architecture.md): follow request serialization, transport, and response conversion.
+- [Development](docs/guide/development.md): build, test, and extend the repository.
+- [API reference](docs/reference/api.md): browse the public client and model types.
+
+Run the documentation site locally:
+
+```bash
+cd docs
+npm install
+npm run docs:dev
+```
+
+Then open `http://localhost:5173`.
+
 ## 💻 Development
 
 From the repository root:
@@ -274,25 +314,6 @@ tests are skipped.
 
 For release preparation and versioning, see the
 [release versioning guide](https://github.com/mehdihadeli/typesafe-jev-dotnet-sdk/blob/main/docs/guide/versioning.md).
-
-## 📚 Documentation
-
-Repository guides:
-
-- [Quickstart](https://github.com/mehdihadeli/typesafe-jev-dotnet-sdk/blob/main/docs/guide/quickstart.md): first request and typed answers.
-- [Architecture](https://github.com/mehdihadeli/typesafe-jev-dotnet-sdk/blob/main/docs/guide/architecture.md): transport, models, and converters.
-- [Development](https://github.com/mehdihadeli/typesafe-jev-dotnet-sdk/blob/main/docs/guide/development.md): project layout and contributor workflow.
-- [API reference](https://github.com/mehdihadeli/typesafe-jev-dotnet-sdk/blob/main/docs/reference/api.md): public client and model types.
-
-Run the VitePress documentation locally:
-
-```bash
-cd docs
-npm install
-npm run docs:dev
-```
-
-Then open `http://localhost:5173`.
 
 ## 🤝 Contributing
 
