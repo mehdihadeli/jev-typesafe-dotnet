@@ -101,7 +101,7 @@ jobs:
         run: dotnet restore src/Jev.Typesafe.Sdk.csproj
 
       - name: Pack
-        run: dotnet pack src/Jev.Typesafe.Sdk.csproj --configuration Release --no-restore --output artifacts -p:PublicRelease=true -p:ReleasePackageVersion="${{ needs['calculate-version'].outputs.version }}"
+        run: dotnet pack src/Jev.Typesafe.Sdk.csproj --configuration Release --no-restore --output artifacts -p:PublicRelease=true -p:ReleasePackageVersion="${{ needs['calculate-version'].outputs.version }}" -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg
 
       - name: Publish to NuGet.org
         run: dotnet nuget push "artifacts/*.nupkg" --api-key "${{ secrets.NUGET_API_KEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate
