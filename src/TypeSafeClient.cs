@@ -6,28 +6,6 @@ using System.Text.Json.Serialization;
 
 namespace Typesafe.Sdk;
 
-public sealed class TypeSafeClientOptions
-{
-    public string? ApiKey { get; init; }
-    public string? BaseUrl { get; init; }
-    public string DefaultModel { get; init; } = "jev-latest";
-    public int MaxRetries { get; init; } = 2;
-    public TimeSpan RetryDelay { get; init; } = TimeSpan.FromMilliseconds(250);
-}
-
-public sealed class TypeSafeApiException : Exception
-{
-    public TypeSafeApiException(HttpStatusCode statusCode, string responseBody)
-        : base($"TypeSafe API returned {(int)statusCode} ({statusCode}).")
-    {
-        StatusCode = statusCode;
-        ResponseBody = responseBody;
-    }
-
-    public HttpStatusCode StatusCode { get; }
-    public string ResponseBody { get; }
-}
-
 public sealed class TypeSafeClient : IDisposable
 {
     private const string DefaultBaseUrl = "https://api.typesafe.ai/";
@@ -186,58 +164,4 @@ public sealed class TypeSafeClient : IDisposable
             _httpClient.Dispose();
         }
     }
-}
-
-internal sealed class TypeSafeAnswerConverter : JsonConverter<TypeSafeAnswer>
-{
-    public override TypeSafeAnswer Read(
-        ref Utf8JsonReader reader,
-        Type typeToConvert,
-        JsonSerializerOptions options
-    )
-    {
-        using var document = JsonDocument.ParseValue(ref reader);
-        var root = document.RootElement;
-        var type = root.GetProperty("type").GetString();
-        return type switch
-        {
-            "noul" => root.Deserialize<NoulAnswer>(options)!,
-            "choice" => root.Deserialize<ChoiceAnswer>(options)!,
-            "score" => root.Deserialize<ScoreAnswer>(options)!,
-            _ => throw new JsonException($"Unsupported TypeSafe answer type '{type}'."),
-        };
-    }
-
-    public override void Write(
-        Utf8JsonWriter writer,
-        TypeSafeAnswer value,
-        JsonSerializerOptions options
-    ) => JsonSerializer.Serialize(writer, (object)value, value.GetType(), options);
-}
-
-internal sealed class TypeSafeQuestionConverter : JsonConverter<TypeSafeQuestion>
-{
-    public override TypeSafeQuestion Read(
-        ref Utf8JsonReader reader,
-        Type typeToConvert,
-        JsonSerializerOptions options
-    )
-    {
-        using var document = JsonDocument.ParseValue(ref reader);
-        var root = document.RootElement;
-        var type = root.GetProperty("type").GetString();
-        return type switch
-        {
-            "noul" => root.Deserialize<Noul>(options)!,
-            "choice" => root.Deserialize<Choice>(options)!,
-            "score" => root.Deserialize<Score>(options)!,
-            _ => throw new JsonException($"Unsupported TypeSafe question type '{type}'."),
-        };
-    }
-
-    public override void Write(
-        Utf8JsonWriter writer,
-        TypeSafeQuestion value,
-        JsonSerializerOptions options
-    ) => JsonSerializer.Serialize(writer, (object)value, value.GetType(), options);
 }

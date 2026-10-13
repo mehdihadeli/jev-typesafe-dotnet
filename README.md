@@ -246,7 +246,7 @@ project reference from your application directory:
 
 ```bash
 git clone https://github.com/mehdihadeli/typesafe-jev-dotnet-sdk.git
-dotnet add reference ./typesafe-jev-dotnet-sdk/src/Typesafe.Sdk.csproj
+dotnet add reference ./typesafe-jev-dotnet-sdk/src/Jev.Typesafe.Sdk.csproj
 ```
 
 Adjust the reference path if you clone the repository elsewhere. Building from
@@ -260,7 +260,7 @@ use the project reference above until the publication name is resolved.
 To inspect a local release package without publishing it:
 
 ```bash
-dotnet pack src/Typesafe.Sdk.csproj --configuration Release --output artifacts
+dotnet pack src/Jev.Typesafe.Sdk.csproj --configuration Release --output artifacts
 ```
 
 Run that command from the repository root. It produces a NuGet package and a
@@ -303,7 +303,7 @@ Then open `http://localhost:5173`.
 From the repository root:
 
 ```bash
-dotnet build Typesafe.Sdk.slnx --configuration Release
+dotnet build Jev.Typesafe.Sdk.slnx --configuration Release
 dotnet test --project tests/unit-tests/Typesafe.Sdk.UnitTests.csproj
 dotnet test --project tests/integration-tests/Typesafe.Sdk.IntegrationTests.csproj
 ```
