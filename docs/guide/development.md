@@ -10,7 +10,7 @@ typesafe-jev-dotnet-sdk/
 │   ├── Directory.Build.props
 │   ├── TypeSafeClient.cs
 │   ├── TypesafeModels.cs
-│   └── Typesafe.Sdk.csproj
+│   └── Jev.Typesafe.Sdk.csproj
 ├── tests/
 │   ├── Directory.Build.props
 │   ├── unit-tests/
@@ -22,7 +22,7 @@ typesafe-jev-dotnet-sdk/
 │       └── Typesafe.Sdk.IntegrationTests.csproj
 ├── Directory.Build.props
 ├── Directory.Packages.props
-└── Typesafe.Sdk.slnx
+└── Jev.Typesafe.Sdk.slnx
 ```
 
 ## Dependency direction
@@ -44,7 +44,7 @@ Restore and build the solution:
 
 ```bash
 dotnet restore
-dotnet build Typesafe.Sdk.slnx
+dotnet build Jev.Typesafe.Sdk.slnx
 ```
 
 Run unit tests:

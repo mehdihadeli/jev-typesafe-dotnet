@@ -1,5 +1,5 @@
 <Solution>
-  <Project Path="src/Typesafe.Sdk.csproj" />
+  <Project Path="src/Jev.Typesafe.Sdk.csproj" />
   <Project Path="tests/unit-tests/Typesafe.Sdk.UnitTests.csproj" />
   <Project Path="tests/integration-tests/Typesafe.Sdk.IntegrationTests.csproj" />
 </Solution>
