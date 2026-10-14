@@ -24,13 +24,14 @@ $env:TYPESAFE_API_KEY = "your-api-key"
 Add the package to an application:
 
 ```bash
-dotnet add package Typesafe.Sdk --prerelease
+dotnet add package Jev.Typesafe.Sdk --prerelease
 ```
 
 ## Ask mixed questions
 
 ```csharp
-using Typesafe.Sdk;
+using Jev.Typesafe.Sdk;
+using Jev.Typesafe.Sdk.Models;
 
 using var client = new TypeSafeClient();
 

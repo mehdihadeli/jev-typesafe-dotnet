@@ -7,7 +7,8 @@ Use two test layers, each with a different job.
 Unit tests run without credentials or network access. They verify HTTP methods, paths, bearer authentication, serialized request fields, and polymorphic response models.
 
 ```bash
-dotnet test --project tests/unit-tests/Typesafe.Sdk.UnitTests.csproj
+dotnet test --project tests/Jev.Typesafe.Sdk/unit-tests/Typesafe.Sdk.UnitTests.csproj
+dotnet test --project tests/Jev.Typesafe.Sdk.Extensions.AI/unit-tests/Jev.Typesafe.Sdk.Extensions.AI.UnitTests.csproj
 ```
 
 When adding a client method, assert both sides of the boundary:
@@ -21,10 +22,17 @@ Integration tests verify that the SDK can authenticate against the real TypeSafe
 
 ```bash
 export TYPESAFE_API_KEY="your-api-key"
-dotnet test --project tests/integration-tests/Typesafe.Sdk.IntegrationTests.csproj
+dotnet test --project tests/Jev.Typesafe.Sdk/integration-tests/Typesafe.Sdk.IntegrationTests.csproj
+dotnet test --project tests/Jev.Typesafe.Sdk.Extensions.AI/integration-tests/Jev.Typesafe.Sdk.Extensions.AI.IntegrationTests.csproj
 ```
 
 Without the key, xUnit v3 skips the live tests through `SkipUnless`. Do not put a key in a test file, committed `.env`, or CI log.
+
+## Classification evaluation
+
+The AI package includes a deterministic `TypeSafeAnswerEvaluator` based on `Microsoft.Extensions.AI.Evaluation`. Supply known expected answers through `TypeSafeAnswerEvaluationContext`; evaluate the adapter's JSON response without another model call. The unit suite checks choice labels, numeric tolerance boundaries, missing answers, invalid JSON, and cancellation. The live AI test checks a known positive sentiment against an independently defined expected label.
+
+This metric measures typed answer accuracy, not fluency, relevance, confidence calibration, or probability-distribution quality. See the [API reference](../reference/api.md#typesafeanswerevaluator) for its contract.
 
 ## Test a new primitive
 

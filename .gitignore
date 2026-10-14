@@ -519,3 +519,5 @@ http-client.private.env.json
 
 docs/.vitepress/cache/
 docs/.vitepress/dist/
+
+.testagent

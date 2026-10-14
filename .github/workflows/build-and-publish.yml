@@ -36,12 +36,19 @@ jobs:
       - name: Build
         run: dotnet build Jev.Typesafe.Sdk.slnx --configuration Release --no-restore
 
-      - name: Test unit project
-        run: dotnet test --project tests/unit-tests/Typesafe.Sdk.UnitTests.csproj --configuration Release --no-restore
+      - name: Test core unit project
+        run: dotnet test --project tests/Jev.Typesafe.Sdk/unit-tests/Typesafe.Sdk.UnitTests.csproj --configuration Release --no-restore
+
+      - name: Test AI unit project
+        run: dotnet test --project tests/Jev.Typesafe.Sdk.Extensions.AI/unit-tests/Jev.Typesafe.Sdk.Extensions.AI.UnitTests.csproj --configuration Release --no-restore
 
       - name: Test integration project
         if: ${{ env.TYPESAFE_API_KEY != '' }}
-        run: dotnet test --project tests/integration-tests/Typesafe.Sdk.IntegrationTests.csproj --configuration Release --no-restore
+        run: dotnet test --project tests/Jev.Typesafe.Sdk/integration-tests/Typesafe.Sdk.IntegrationTests.csproj --configuration Release --no-restore
+
+      - name: Test AI integration project
+        if: ${{ env.TYPESAFE_API_KEY != '' }}
+        run: dotnet test --project tests/Jev.Typesafe.Sdk.Extensions.AI/integration-tests/Jev.Typesafe.Sdk.Extensions.AI.IntegrationTests.csproj --configuration Release --no-restore
 
   calculate-version:
     name: Calculate release version
@@ -76,13 +83,15 @@ jobs:
           NBGV="$RUNNER_TEMP/nbgv/nbgv" bash scripts/calculate-version.sh
 
   publish:
-    name: Publish package and release assets
+    name: Publish both packages and release assets
     if: startsWith(github.ref, 'refs/tags/v') || (github.ref == 'refs/heads/main' && needs['calculate-version'].outputs.environment == 'dev')
     needs:
       - build-test
       - calculate-version
     runs-on: ubuntu-latest
     environment: nuget
+    env:
+      RELEASE_VERSION: ${{ needs['calculate-version'].outputs.version }}
     permissions:
       contents: write
 
@@ -98,16 +107,32 @@ jobs:
           dotnet-version: 10.0.x
 
       - name: Restore
-        run: dotnet restore src/Jev.Typesafe.Sdk.csproj
+        run: dotnet restore Jev.Typesafe.Sdk.slnx
 
-      - name: Pack
-        run: dotnet pack src/Jev.Typesafe.Sdk.csproj --configuration Release --no-restore --output artifacts -p:PublicRelease=true -p:ReleasePackageVersion="${{ needs['calculate-version'].outputs.version }}"
+      - name: Pack both packages
+        shell: bash
+        run: |
+          dotnet pack src/Jev.Typesafe.Sdk/Jev.Typesafe.Sdk.csproj --configuration Release --no-restore --output artifacts -p:PublicRelease=true -p:ReleasePackageVersion="$RELEASE_VERSION"
+          dotnet pack src/Jev.Typesafe.Sdk.Extensions.AI/Jev.Typesafe.Sdk.Extensions.AI.csproj --configuration Release --no-restore --output artifacts -p:PublicRelease=true -p:ReleasePackageVersion="$RELEASE_VERSION"
+
+      - name: Verify both package artifacts
+        shell: bash
+        run: |
+          for package in Jev.Typesafe.Sdk Jev.Typesafe.Sdk.Extensions.AI; do
+            test -f "artifacts/$package.$RELEASE_VERSION.nupkg"
+            test -f "artifacts/$package.$RELEASE_VERSION.snupkg"
+          done
 
       - name: Publish to NuGet.org
-        run: dotnet nuget push "artifacts/*.nupkg" --api-key "${{ secrets.NUGET_API_KEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate
+        shell: bash
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: |
+          for package in Jev.Typesafe.Sdk Jev.Typesafe.Sdk.Extensions.AI; do
+            dotnet nuget push "artifacts/$package.$RELEASE_VERSION.nupkg" --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json --skip-duplicate
+          done
 
       - name: Publish matching Release Drafter draft
-        if: always()
         uses: release-drafter/release-drafter@v7
         with:
           config-name: release-drafter.yml

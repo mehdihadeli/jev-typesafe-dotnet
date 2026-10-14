@@ -193,7 +193,8 @@ Before pushing a release tag, inspect the calculated version:
 
 ```bash
 dotnet nbgv get-version -v SemVer2
-dotnet test --project tests/unit-tests/Typesafe.Sdk.UnitTests.csproj --configuration Release
+dotnet test --project tests/Jev.Typesafe.Sdk/unit-tests/Typesafe.Sdk.UnitTests.csproj --configuration Release
+dotnet test --project tests/Jev.Typesafe.Sdk.Extensions.AI/unit-tests/Jev.Typesafe.Sdk.Extensions.AI.UnitTests.csproj --configuration Release
 ```
 
 Then inspect `version.json`, confirm the tag comes from the merged `main`

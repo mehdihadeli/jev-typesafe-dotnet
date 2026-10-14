@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <IsTestProject>true</IsTestProject>
+    <RootNamespace>Jev.Typesafe.Sdk.IntegrationTests</RootNamespace>
+    <AssemblyName>Jev.Typesafe.Sdk.IntegrationTests</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\Jev.Typesafe.Sdk\Jev.Typesafe.Sdk.csproj" />
+  </ItemGroup>
+</Project>
