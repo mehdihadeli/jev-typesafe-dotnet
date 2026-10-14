@@ -1,8 +1,14 @@
-# 📦 TypeSafe .NET SDK
+# Jev.Typesafe.Sdk
 
-Community .NET SDK for [TypeSafe AI](https://typesafe.ai/) and its **System One**
-classification API. Send text or JSON state with named typed questions, then use
-structured `Noul`, `Choice`, and `Score` answers in application code.
+[![build-test-publish](https://img.shields.io/github/actions/workflow/status/mehdihadeli/typesafe-jev-dotnet-sdk/build-and-publish.yml?branch=main&style=for-the-badge&label=build-test-publish)](https://github.com/mehdihadeli/typesafe-jev-dotnet-sdk/actions/workflows/build-and-publish.yml)
+[![License](https://img.shields.io/github/license/mehdihadeli/typesafe-jev-dotnet-sdk?style=for-the-badge)](LICENSE)
+[![.NET](https://img.shields.io/badge/.NET%20Standard%202.0%20%7C%20.NET%2010-512bd4?style=for-the-badge)](https://dotnet.microsoft.com/platform/dotnet)
+
+**Jev.Typesafe.Sdk** is a community .NET library for [TypeSafe AI](https://typesafe.ai/)
+and its **System One** classification API.
+
+Send text or JSON state with named typed questions, then use structured `Noul`,
+`Choice`, and `Score` answers in application code.
 
 **Jev** is the default System One model, with support for selecting another model
 available to your account. This project is a community .NET port of the official
@@ -22,10 +28,10 @@ native typed System One calls, or add the optional AI package for
 
 ## Packages
 
-| Package | NuGet | Purpose | Dependencies |
-| --- | --- | --- | --- |
-| `Jev.Typesafe.Sdk` | [NuGet](https://www.nuget.org/packages/Jev.Typesafe.Sdk) | Core System One client. Sends state and typed questions to Jev or another selected model; returns structured answers and model metadata. | `System.Net.Http.Json` and `System.Text.Json` on .NET Standard 2.0; no Microsoft AI dependency. |
-| `Jev.Typesafe.Sdk.Extensions.AI` | [NuGet](https://www.nuget.org/packages/Jev.Typesafe.Sdk.Extensions.AI) | Optional `IChatClient` adapter and deterministic evaluation for TypeSafe answers. | `Jev.Typesafe.Sdk`, `Microsoft.Extensions.AI.Abstractions`, and `Microsoft.Extensions.AI.Evaluation`. |
+| Package | Description | Latest NuGet |
+| --- | --- | --- |
+| [`Jev.Typesafe.Sdk`](https://www.nuget.org/packages/Jev.Typesafe.Sdk) | Core typed client for System One. Sends text or structured state with `Noul`, `Choice`, and `Score` questions, then returns structured answers, probabilities, confidence, usage, and model metadata. | [![NuGet](https://img.shields.io/nuget/v/Jev.Typesafe.Sdk?style=for-the-badge&color=blue&label=NuGet)](https://www.nuget.org/packages/Jev.Typesafe.Sdk) |
+| [`Jev.Typesafe.Sdk.Extensions.AI`](https://www.nuget.org/packages/Jev.Typesafe.Sdk.Extensions.AI) | Optional `Microsoft.Extensions.AI` integration with an `IChatClient` adapter and deterministic evaluation for TypeSafe answers. | [![NuGet](https://img.shields.io/nuget/v/Jev.Typesafe.Sdk.Extensions.AI?style=for-the-badge&color=blue&label=NuGet)](https://www.nuget.org/packages/Jev.Typesafe.Sdk.Extensions.AI) |
 
 Install only the core package for direct typed classification. Add the AI
 package when an application already uses `IChatClient` pipelines or needs the
