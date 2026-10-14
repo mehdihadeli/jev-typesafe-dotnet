@@ -15,6 +15,9 @@
   </ItemGroup>
 
   <ItemGroup Label="Test Usings">
+    <Using Include="Jev.Typesafe.Sdk" />
+    <Using Include="Jev.Typesafe.Sdk.Models" />
+    <Using Include="Jev.Typesafe.Sdk.Exceptions" />
     <Using Include="Shouldly" />
     <Using Include="Xunit" />
   </ItemGroup>

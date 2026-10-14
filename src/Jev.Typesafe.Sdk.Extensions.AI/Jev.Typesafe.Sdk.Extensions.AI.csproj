@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>Jev.Typesafe.Sdk.Extensions.AI</PackageId>
+    <RootNamespace>Jev.Typesafe.Sdk.Extensions.AI</RootNamespace>
+    <Title>Jev TypeSafe SDK Microsoft.Extensions.AI Integration</Title>
+    <Authors>Mehdi Hadeli</Authors>
+    <Description>Optional Microsoft.Extensions.AI IChatClient adapter and deterministic classification evaluation for the community Jev TypeSafe SDK and TypeSafe AI System One API.</Description>
+    <PackageTags>typesafe;ai;system-one;jev;sdk;classification;evaluation;Microsoft.Extensions.AI</PackageTags>
+    <PackageProjectUrl>https://github.com/mehdihadeli/typesafe-jev-dotnet-sdk</PackageProjectUrl>
+    <IsPackable>true</IsPackable>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <RepositoryUrl>https://github.com/mehdihadeli/typesafe-jev-dotnet-sdk</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <TargetFramework />
+    <TargetFrameworks>netstandard2.0;net10.0</TargetFrameworks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Jev.Typesafe.Sdk\Jev.Typesafe.Sdk.csproj" />
+    <Using Include="Jev.Typesafe.Sdk" />
+    <Using Include="Jev.Typesafe.Sdk.Models" />
+    <PackageReference Include="Microsoft.Extensions.AI.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.AI.Evaluation" />
+    <None Include="README.md" Pack="true" PackagePath="README.md" />
+  </ItemGroup>
+
+  <Target Name="ApplyReleasePackageVersion" AfterTargets="GetBuildVersion" Condition="'$(ReleasePackageVersion)' != ''">
+    <PropertyGroup>
+      <PackageVersion>$(ReleasePackageVersion)</PackageVersion>
+    </PropertyGroup>
+  </Target>
+</Project>

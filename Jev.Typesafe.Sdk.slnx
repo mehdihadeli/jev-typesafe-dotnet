@@ -1,5 +1,14 @@
 <Solution>
-  <Project Path="src/Jev.Typesafe.Sdk.csproj" />
-  <Project Path="tests/unit-tests/Typesafe.Sdk.UnitTests.csproj" />
-  <Project Path="tests/integration-tests/Typesafe.Sdk.IntegrationTests.csproj" />
+  <Project Path="src/Jev.Typesafe.Sdk/Jev.Typesafe.Sdk.csproj" />
+  <Folder Name="/samples/">
+    <Project Path="samples/CoreSdk/CoreSdk.csproj" />
+    <Project Path="samples/ExtensionsAI/ExtensionsAI.csproj" />
+    <Project Path="samples/Observability/Observability.csproj" />
+  </Folder>
+  <Folder Name="/src/" />
+  <Project Path="src/Jev.Typesafe.Sdk.Extensions.AI/Jev.Typesafe.Sdk.Extensions.AI.csproj" />
+  <Project Path="tests/Jev.Typesafe.Sdk/unit-tests/Typesafe.Sdk.UnitTests.csproj" />
+  <Project Path="tests/Jev.Typesafe.Sdk/integration-tests/Typesafe.Sdk.IntegrationTests.csproj" />
+  <Project Path="tests/Jev.Typesafe.Sdk.Extensions.AI/unit-tests/Jev.Typesafe.Sdk.Extensions.AI.UnitTests.csproj" />
+  <Project Path="tests/Jev.Typesafe.Sdk.Extensions.AI/integration-tests/Jev.Typesafe.Sdk.Extensions.AI.IntegrationTests.csproj" />
 </Solution>

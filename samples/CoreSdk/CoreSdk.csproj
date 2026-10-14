@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Jev.Typesafe.Sdk\Jev.Typesafe.Sdk.csproj" />
+  </ItemGroup>
+</Project>
