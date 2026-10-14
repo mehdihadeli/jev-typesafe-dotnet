@@ -57,8 +57,7 @@ internal static class ResponseDecoder
                 if (mutable["answers"] is JsonObject answerMap)
                 {
                     foreach (var name in unmodeled.Keys) answerMap.Remove(name);
-                    foreach (var property in (typeInfo ?? options.GetTypeInfo(typeof(T))).Properties
-                        .Where(property => property.Set is not null))
+                    foreach (var property in (typeInfo ?? options.GetTypeInfo(typeof(T))).Properties)
                     {
                         if (typeof(SystemOneResponse).GetProperties().Any(baseProperty =>
                             (baseProperty.GetCustomAttribute<JsonPropertyNameAttribute>()?.Name

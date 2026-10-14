@@ -186,6 +186,18 @@ public sealed class ResponsesTests
 public sealed class TypedResponseModelsTests
 {
     [Fact]
+    public async Task Generic_ConstructorBoundAnswer_IsLifted()
+    {
+        var handler = ParityTestHelper.Handler();
+        using var client = ParityTestHelper.Client(handler);
+        var response = await client.SystemOneAsync<ConstructorLiftedResponse>("x", ParityTestHelper.Questions(),
+            cancellationToken: TestContext.Current.CancellationToken);
+        response.N.Noul.ShouldBe(0.93);
+        response.Nouls["n"].Noul.ShouldBe(0.93);
+        response.RawHttpResponse.Content.ShouldBe(ParityTestHelper.Result);
+    }
+
+    [Fact]
     public async Task Generic_RawJsonObject_PreservesFutureAndNullWithoutSdkSchema()
     {
         const string body = "{\"future\":{\"type\":\"aurora\",\"nested\":[null,3]},\"nullable\":null}";
@@ -321,6 +333,12 @@ public sealed class LiftedResponse : SystemOneResponse
     [JsonPropertyName("n")]
     public required NoulAnswer N { get; init; }
     public NoulAnswer? Missing { get; init; }
+}
+
+public sealed class ConstructorLiftedResponse(NoulAnswer n) : SystemOneResponse
+{
+    [JsonPropertyName("n")]
+    public NoulAnswer N { get; } = n;
 }
 
 public sealed class CustomLiftedResponse : SystemOneResponse
