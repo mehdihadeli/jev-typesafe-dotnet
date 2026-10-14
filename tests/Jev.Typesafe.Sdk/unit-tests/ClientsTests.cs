@@ -6,6 +6,27 @@ namespace Jev.Typesafe.Sdk.UnitTests;
 public sealed class ClientsTests
 {
     [Fact]
+    public async Task Headers_SuppliedRetryDefault_IsSuppressedAndReplacedOnRetry()
+    {
+        var handler = new ParityHandler((index, _, _) => Task.FromResult(index == 0
+            ? ParityTestHelper.Response("{\"message\":\"busy\"}", 503)
+            : ParityTestHelper.Response("{\"models\":[]}")));
+        using var http = new HttpClient(handler);
+        http.DefaultRequestHeaders.TryAddWithoutValidation("X-TypeSafe-Retry-Count", "99");
+        using var client = new TypeSafeClient(new TypeSafeClientOptions
+        {
+            ApiKey = "test-key", HttpClient = http, LeaveOpen = true,
+            Retry = new RetryPolicy { MaxRetries = 1, BackoffInitial = TimeSpan.Zero },
+            DelayAsync = (_, _) => Task.CompletedTask,
+        });
+        await client.Models.ListAsync(cancellationToken: TestContext.Current.CancellationToken);
+        handler.Requests.Count.ShouldBe(2);
+        handler.Requests[0].Headers.GetValueOrDefault("X-TypeSafe-Retry-Count").ShouldBeNullOrEmpty();
+        handler.Requests[1].Headers["X-TypeSafe-Retry-Count"].ShouldBe("1");
+        http.DefaultRequestHeaders.GetValues("X-TypeSafe-Retry-Count").ShouldBe(new[] { "99" });
+    }
+
+    [Fact]
     public async Task Headers_ProtectedValuesWinAndSuppliedClientRemainsUnchanged()
     {
         var handler = new ParityHandler((_, request, _) => Task.FromResult(ParityTestHelper.Response(request.Method == HttpMethod.Get ? "{\"models\":[]}" : ParityTestHelper.Result)));
@@ -46,7 +67,7 @@ public sealed class ClientsTests
             request.Headers["x-http-default"].ShouldBe("kept");
             request.Headers["x-sdk-default"].ShouldBe("kept");
             request.Headers["x-team"].ShouldBe("call");
-            request.Headers.ContainsKey("X-TypeSafe-Retry-Count").ShouldBeFalse();
+            request.Headers.GetValueOrDefault("X-TypeSafe-Retry-Count").ShouldBeNullOrEmpty();
         }
         http.DefaultRequestHeaders.ToString().ShouldBe(originalHeaders);
         http.BaseAddress.ShouldBe(new Uri("https://wrong.test"));

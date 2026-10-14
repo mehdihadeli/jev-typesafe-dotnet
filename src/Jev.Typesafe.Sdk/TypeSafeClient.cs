@@ -197,6 +197,9 @@ public sealed class TypeSafeClient : IDisposable, IAsyncDisposable
                 }
                 foreach (var pair in headers)
                     if (!pair.Key.Equals("Content-Type", StringComparison.OrdinalIgnoreCase)) request.Headers.TryAddWithoutValidation(pair.Key, pair.Value);
+                // An empty request header suppresses HttpClient's default without sending a wire value.
+                if (attempt == 0 && _httpClient.DefaultRequestHeaders.Contains("X-TypeSafe-Retry-Count"))
+                    request.Headers.TryAddWithoutValidation("X-TypeSafe-Retry-Count", (string?)null);
                 if (attempt > 0)
                 {
                     request.Headers.TryAddWithoutValidation("X-TypeSafe-Retry-Count", attempt.ToString(System.Globalization.CultureInfo.InvariantCulture));

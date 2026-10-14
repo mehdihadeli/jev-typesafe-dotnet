@@ -69,7 +69,9 @@ public class TypeSafeApiException : TypeSafeException
     private static string? ExtractMessage(object? body)
     {
         if (body is string text) return text;
-        if (body is not JsonElement element || element.ValueKind != JsonValueKind.Object) return null;
+        if (body is not JsonElement element) return null;
+        if (element.ValueKind == JsonValueKind.String) return element.GetString();
+        if (element.ValueKind != JsonValueKind.Object) return null;
         if (element.TryGetProperty("error", out var error))
         {
             if (error.ValueKind == JsonValueKind.String) return error.GetString();

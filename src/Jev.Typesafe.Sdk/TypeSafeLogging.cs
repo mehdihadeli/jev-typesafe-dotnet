@@ -35,13 +35,29 @@ internal static class TypeSafeLogging
                 ? new[] { pair.Value, pair.Value.Substring(pair.Value.IndexOf(' ') + 1) } : new[] { pair.Value });
         foreach (var value in values.Where(value => value.Length > 0).OrderByDescending(value => value.Length))
         {
-            text = text.Replace(value, "***").Replace(Uri.EscapeDataString(value), "***");
             var escaped = JsonSerializer.Serialize(value);
-            text = text.Replace(escaped.Substring(1, escaped.Length - 2), "***");
+            foreach (var representation in new[]
+            {
+                value, Uri.EscapeDataString(value), escaped.Substring(1, escaped.Length - 2),
+                value.Replace("\\", "\\\\").Replace("'", "\\'").Replace("\n", "\\n").Replace("\r", "\\r").Replace("\t", "\\t"),
+                value.Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("\n", "\\n").Replace("\r", "\\r").Replace("\t", "\\t"),
+            }.OrderByDescending(representation => representation.Length))
+                text = text.Replace(representation, "***");
         }
         return text;
     }
 
-    internal static Exception SafeException(Exception error, IReadOnlyDictionary<string, string> headers, int depth = 0) =>
-        new Exception(Redact(error.Message, headers), depth < 8 && error.InnerException is { } inner ? SafeException(inner, headers, depth + 1) : null);
+    internal static Exception SafeException(Exception error, IReadOnlyDictionary<string, string> headers, int depth = 0)
+    {
+        var message = Redact(error.Message, headers);
+        var inner = depth < 8 && error.InnerException is { } cause ? SafeException(cause, headers, depth + 1) : null;
+        return error switch
+        {
+            HttpRequestException => new HttpRequestException(message, inner),
+            System.IO.IOException => new System.IO.IOException(message, inner),
+            InvalidOperationException => new InvalidOperationException(message, inner),
+            OperationCanceledException => new OperationCanceledException(message, inner),
+            _ => new Exception(message, inner),
+        };
+    }
 }

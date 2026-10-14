@@ -450,6 +450,19 @@ public sealed class LoggingTests
         handler.Requests.Count.ShouldBe(1);
     }
 
+    [Theory]
+    [InlineData("'")]
+    [InlineData("\"")]
+    public void Redact_QuotedEscapes_AreReplacedBeforeRawCredentials(string quote)
+    {
+        const string credential = "private'quoted\"value\\tail";
+        var value = "Bearer " + credential;
+        var escaped = value.Replace("\\", "\\\\").Replace(quote, "\\" + quote);
+        var headers = new Dictionary<string, string> { ["Authorization"] = value };
+        TypeSafeLogging.Redact("Illegal header value b" + quote + escaped + quote, headers)
+            .ShouldBe("Illegal header value b" + quote + "***" + quote);
+    }
+
     [Fact]
     public async Task TransportException_ReconstructibleNetworkTypeAndDiagnostics_Preserved()
     {

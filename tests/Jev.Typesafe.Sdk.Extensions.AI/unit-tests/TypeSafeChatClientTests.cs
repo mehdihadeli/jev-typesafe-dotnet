@@ -8,7 +8,7 @@ namespace Jev.Typesafe.Sdk.Extensions.AI.UnitTests;
 public sealed class TypeSafeChatClientTests
 {
     private const string ResponseJson = """
-        {"model":"jev-test","answers":{"billing":{"type":"noul","noul":0.9},"tone":{"type":"choice","choice":"positive","confidence":0.8,"probabilities":{"positive":0.8,"negative":0.2}},"severity":{"type":"score","score":1.5,"confidence":0.7,"probabilities":{"1":0.5,"2":0.5}}},"usage":{"input_tokens":10,"output_tokens":8}}
+        {"model":"jev-test","answers":{"billing":{"type":"noul","noul":0.9},"tone":{"type":"choice","choice":"positive","confidence":0.8,"probabilities":{"positive":0.8,"negative":0.2}},"severity":{"type":"score","score":1.5,"confidence":0.7,"legend":{"1":"low","2":"high"},"probabilities":{"1":0.5,"2":0.5}}},"usage":{"input_tokens":10,"output_tokens":8}}
         """;
 
     [Fact]

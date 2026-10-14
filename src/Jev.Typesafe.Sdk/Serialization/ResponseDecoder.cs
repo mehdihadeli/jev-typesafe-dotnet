@@ -11,7 +11,7 @@ internal static class ResponseDecoder
     internal static JsonSerializerOptions CreateOptions(JsonSerializerOptions? source = null)
     {
         var options = source is null ? new JsonSerializerOptions(JsonSerializerDefaults.Web) : new JsonSerializerOptions(source);
-        options.NumberHandling = JsonNumberHandling.Strict;
+        if (source is null) options.NumberHandling = JsonNumberHandling.Strict;
         options.Converters.Add(new TypeSafeAnswerConverter());
         options.Converters.Add(new TypeSafeQuestionConverter());
         options.TypeInfoResolver ??= new DefaultJsonTypeInfoResolver();
@@ -57,11 +57,13 @@ internal static class ResponseDecoder
                 if (mutable["answers"] is JsonObject answerMap)
                 {
                     foreach (var name in unmodeled.Keys) answerMap.Remove(name);
-                    foreach (var property in typeof(T).GetProperties().Where(property => property.DeclaringType != typeof(SystemOneResponse)
-                        && typeof(TypeSafeAnswer).IsAssignableFrom(property.PropertyType)))
+                    foreach (var property in (typeInfo ?? options.GetTypeInfo(typeof(T))).Properties
+                        .Where(property => property.Set is not null))
                     {
-                        var name = property.GetCustomAttribute<JsonPropertyNameAttribute>()?.Name
-                            ?? options.PropertyNamingPolicy?.ConvertName(property.Name) ?? property.Name;
+                        if (typeof(SystemOneResponse).GetProperties().Any(baseProperty =>
+                            (baseProperty.GetCustomAttribute<JsonPropertyNameAttribute>()?.Name
+                                ?? options.PropertyNamingPolicy?.ConvertName(baseProperty.Name) ?? baseProperty.Name) == property.Name)) continue;
+                        var name = property.Name;
                         if (answerMap.TryGetPropertyValue(name, out var value)) mutable[name] = value?.DeepClone();
                     }
                 }
@@ -69,6 +71,7 @@ internal static class ResponseDecoder
             }
             else if (typeof(ModelMetadataList).IsAssignableFrom(typeof(T)))
             {
+                RequireKind(root, JsonValueKind.Object, raw, "");
                 var models = Require(root, "models", JsonValueKind.Array, raw, "");
                 var index = 0;
                 foreach (var model in models.EnumerateArray())
